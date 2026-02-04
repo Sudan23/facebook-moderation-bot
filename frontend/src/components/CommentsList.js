@@ -92,6 +92,7 @@ function CommentsList() {
 
   useEffect(() => {
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {

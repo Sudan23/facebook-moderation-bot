@@ -1,4 +1,5 @@
 const toxicity = require('@tensorflow-models/toxicity');
+require('@tensorflow/tfjs');
 
 /**
  * AI Moderation Service

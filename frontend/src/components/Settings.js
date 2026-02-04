@@ -14,9 +14,6 @@ import {
   Alert,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 /**
  * Settings Component
@@ -40,8 +37,6 @@ function Settings() {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      
       // In a real implementation, fetch user settings from API
       // For now, use default settings
       setSettings({
@@ -65,7 +60,6 @@ function Settings() {
       setSaving(true);
       setError(null);
       setSuccessMessage(null);
-      const token = localStorage.getItem('token');
       
       // In a real implementation, save to API
       // await axios.put(`${API_URL}/users/settings`, settings, {

@@ -76,8 +76,13 @@ async function startServer() {
     });
     console.log('✓ MongoDB connected successfully');
     
-    // Initialize AI moderation model
-    await moderationService.initializeToxicityModel();
+    // Initialize AI moderation model (optional, won't block server startup)
+    try {
+      await moderationService.initializeToxicityModel();
+    } catch (error) {
+      console.warn('⚠ Could not load AI model (network required). Server will continue without AI features.');
+      console.warn('  To enable AI moderation, ensure internet access or deploy with the model pre-loaded.');
+    }
     
     // Start server
     app.listen(PORT, () => {
