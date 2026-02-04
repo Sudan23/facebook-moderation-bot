@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6
+    container_name: facebook-moderation-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: facebook-moderation
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - facebook-moderation-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: facebook-moderation-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/facebook-moderation
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_change_this}
+      - FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+      - FACEBOOK_APP_SECRET=${FACEBOOK_APP_SECRET}
+      - FACEBOOK_CALLBACK_URL=${FACEBOOK_CALLBACK_URL:-http://localhost:5000/auth/facebook/callback}
+      - CLIENT_URL=http://localhost:3000
+      - FACEBOOK_API_VERSION=v18.0
+    depends_on:
+      - mongodb
+    networks:
+      - facebook-moderation-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Dashboard
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: facebook-moderation-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+      - REACT_APP_FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+    depends_on:
+      - backend
+    networks:
+      - facebook-moderation-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  facebook-moderation-network:
+    driver: bridge
